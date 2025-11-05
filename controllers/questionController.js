@@ -1,6 +1,6 @@
 import Question from "../models/Question.js";
 
-// ✅ GET: All Questions (optionally filter by topic)
+//  GET: All Questions (optionally filter by topic)
 export const getAllQuestions = async (req, res) => {
   try {
     const filter = {};
@@ -12,7 +12,7 @@ export const getAllQuestions = async (req, res) => {
   }
 };
 
-// ✅ POST: Add New Question
+// POST: Add New Question
 export const addQuestion = async (req, res) => {
   try {
     const { topic, question, options, answer } = req.body;
@@ -24,7 +24,7 @@ export const addQuestion = async (req, res) => {
   }
 };
 
-// ✅ PUT: Update Question
+// PUT: Update Question
 export const updateQuestion = async (req, res) => {
   try {
     const { id } = req.params;
@@ -37,7 +37,7 @@ export const updateQuestion = async (req, res) => {
   }
 };
 
-// ✅ DELETE: Remove Question
+//  DELETE: Remove Question
 export const deleteQuestion = async (req, res) => {
   try {
     const { id } = req.params;
