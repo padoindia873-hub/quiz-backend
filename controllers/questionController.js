@@ -1,16 +1,29 @@
 import Question from "../models/question.js";
 
 //  GET: All Questions (optionally filter by topic)
+// export const getAllQuestions = async (req, res) => {
+//   try {
+//     const filter = {};
+//     if (req.query.topic) filter.topic = req.query.topic;
+//     const questions = await Question.find(filter);
+//     res.status(200).json(questions);
+//   } catch (err) {
+//     res.status(500).json({ message: err.message });
+//   }
+// };
+
 export const getAllQuestions = async (req, res) => {
   try {
     const filter = {};
     if (req.query.topic) filter.topic = req.query.topic;
-    const questions = await Question.find(filter);
+
+    const questions = await Question.find(filter).lean().maxTimeMS(20000);
     res.status(200).json(questions);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ message: "Server timeout or query fail" });
   }
 };
+
 
 // POST: Add New Question
 export const addQuestion = async (req, res) => {
