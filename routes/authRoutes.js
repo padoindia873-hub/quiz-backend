@@ -6,35 +6,61 @@ import authMiddleware from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-// REGISTER USER
+/* -------------------------------------
+   REGISTER USER (Student/Admin/SuperAdmin)
+-------------------------------------- */
 router.post("/register", async (req, res) => {
   try {
     const { email, password, userType } = req.body;
 
-    // check existing user
+    // Check existing user
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "Email already registered" });
     }
 
-    // hash password
+    // Role Validation
+    if (userType === "ADMIN" || userType === "SUPER_ADMIN") {
+      const token = req.headers.authorization?.split(" ")[1];
+
+      if (!token) {
+        return res.status(401).json({
+          message: "Only SUPER_ADMIN can create ADMIN or SUPER_ADMIN accounts",
+        });
+      }
+
+      const decoded = jwt.verify(
+        token,
+        process.env.JWT_SECRET || "secret123"
+      );
+
+      if (decoded.userType !== "SUPER_ADMIN") {
+        return res.status(403).json({
+          message: "You are not authorized to create admin or super admin accounts",
+        });
+      }
+    }
+
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // create user
-    const user = new User({
+    // Create user
+    const newUser = new User({
       ...req.body,
       password: hashedPassword,
     });
 
-    await user.save();
+    await newUser.save();
 
-    res.status(201).json({ message: "Registration Successful", userType });
+    res.status(201).json({
+      message: "Registration Successful",
+      userType: newUser.userType,
+    });
+
   } catch (error) {
-    console.error(error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
-}
-);
+});
 
 /* ----------------------------
    USER LOGIN

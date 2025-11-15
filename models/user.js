@@ -7,9 +7,16 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   country: { type: String, required: true },
   phone: { type: String, required: true },
-  userType: { type: String, enum: ["STUDENT", "ADMIN"], required: true },
 
-  // Student-specific fields
+  // user type
+  userType: { 
+    type: String, 
+    enum: ["STUDENT", "ADMIN", "SUPER_ADMIN"], 
+    default: "STUDENT",
+    required: true 
+  },
+
+  /* Student Fields */
   dateOfBirth: String,
   whatsappNumber: String,
   address: String,
@@ -22,4 +29,4 @@ const userSchema = new mongoose.Schema({
   aadharCardNumber: String,
 });
 
-export default mongoose.model("user", userSchema);
+export default mongoose.model("User", userSchema);
