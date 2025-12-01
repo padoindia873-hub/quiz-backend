@@ -193,7 +193,7 @@ router.get("/profile", authMiddleware, async (req, res) => {
 /* ----------------------------
    FIND USER BY EMAIL OR PHONE
 ---------------------------- */
-router.post("/find-user", authMiddleware, async (req, res) => {
+router.post("/find-user", async (req, res) => {
   try {
     const { email, phone } = req.body;
 
@@ -224,10 +224,7 @@ router.post("/find-user", authMiddleware, async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 });
-/* ----------------------------
-   GET ALL STUDENTS (No Admin Check)
----------------------------- */
-router.get("/users", authMiddleware, async (req, res) => {
+router.get("/users", async (req, res) => {
   try {
     const students = await User.find({ userType: "STUDENT" }).select("-password");
 
