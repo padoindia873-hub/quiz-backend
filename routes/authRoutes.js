@@ -239,4 +239,36 @@ router.get("/users", async (req, res) => {
   }
 });
 
+// Update Bank Transaction (No Auth)
+router.put("/users/:id/bank-transaction", async (req, res) => {
+  try {
+    const { transactionId } = req.body;
+
+    if (!transactionId) {
+      return res.status(400).json({
+        message: "Transaction ID is required",
+      });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.params.id,
+      { bankTransaction: transactionId },
+      { new: true }
+    ).select("-password");
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({
+      message: "Bank Transaction Updated Successfully",
+      user: updatedUser,
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
+
 export default router;
