@@ -190,5 +190,56 @@ router.get("/profile", authMiddleware, async (req, res) => {
   }
 });
 
+/* ----------------------------
+   FIND USER BY EMAIL OR PHONE
+---------------------------- */
+router.post("/find-user", authMiddleware, async (req, res) => {
+  try {
+    const { email, phone } = req.body;
+
+    if (!email && !phone) {
+      return res.status(400).json({
+        message: "Please provide email or phone number",
+      });
+    }
+
+    let query = {};
+    if (email) query.email = email;
+    if (phone) query.phone = phone;
+
+    const user = await User.findOne(query).select("-password");
+
+    if (!user) {
+      return res.status(404).json({
+        message: "No user found with given details",
+      });
+    }
+
+    res.status(200).json({
+      message: "User Found",
+      user,
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+/* ----------------------------
+   GET ALL STUDENTS (No Admin Check)
+---------------------------- */
+router.get("/users", authMiddleware, async (req, res) => {
+  try {
+    const students = await User.find({ userType: "STUDENT" }).select("-password");
+
+    res.status(200).json({
+      message: "Student Users Fetched Successfully",
+      count: students.length,
+      users: students,
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
 
 export default router;
