@@ -302,24 +302,23 @@ router.get("/transaction/:transactionId", async (req, res) => {
 // UPDATE BUY ROLL (No Auth)
 // UPDATE buyRoll USING transactionId
 // UPDATE BUYROLL BY TRANSACTION ID
+// UPDATE BUYROLL BY TRANSACTION ID
 router.put("/update-buyRoll-by-transaction/:transactionId", async (req, res) => {
   try {
     const { transactionId } = req.params;
     const { buyRoll } = req.body;
 
+    // Validate transaction ID
     if (!transactionId) {
-      return res.status(400).json({
-        message: "Transaction ID is required",
-      });
+      return res.status(400).json({ message: "Transaction ID is required" });
     }
 
-    if (!buyRoll) {
-      return res.status(400).json({
-        message: "buyRoll value is required",
-      });
+    // Validate buyRoll
+    if (buyRoll === undefined || buyRoll === null) {
+      return res.status(400).json({ message: "buyRoll value is required" });
     }
 
-    // Find user by transaction ID and update buyRoll
+    // Update user by transactionId
     const updatedUser = await User.findOneAndUpdate(
       { bankTransaction: transactionId },
       { buyRoll },
@@ -344,5 +343,6 @@ router.put("/update-buyRoll-by-transaction/:transactionId", async (req, res) => 
     });
   }
 });
+
 
 export default router;
