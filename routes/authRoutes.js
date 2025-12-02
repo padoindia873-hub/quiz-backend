@@ -300,9 +300,17 @@ router.get("/transaction/:transactionId", async (req, res) => {
 });
 
 // UPDATE BUY ROLL (No Auth)
-router.put("/users/:id/buy-roll", async (req, res) => {
+// UPDATE buyRoll USING transactionId
+router.put("/update-buyroll-by-transaction/:transactionId", async (req, res) => {
   try {
+    const { transactionId } = req.params;
     const { buyRoll } = req.body;
+
+    if (!transactionId) {
+      return res.status(400).json({
+        message: "Transaction ID is required",
+      });
+    }
 
     if (!buyRoll) {
       return res.status(400).json({
@@ -310,21 +318,22 @@ router.put("/users/:id/buy-roll", async (req, res) => {
       });
     }
 
-    const updatedUser = await User.findByIdAndUpdate(
-      req.params.id,
+    // Find user with this transaction ID
+    const user = await User.findOneAndUpdate(
+      { bankTransaction: transactionId },
       { buyRoll },
       { new: true }
     ).select("-password");
 
-    if (!updatedUser) {
+    if (!user) {
       return res.status(404).json({
-        message: "User not found",
+        message: "No user found with given transaction ID",
       });
     }
 
     res.status(200).json({
-      message: "buyRoll updated successfully",
-      user: updatedUser,
+      message: "buyRoll updated successfully using transactionId",
+      user,
     });
 
   } catch (error) {
@@ -334,6 +343,7 @@ router.put("/users/:id/buy-roll", async (req, res) => {
     });
   }
 });
+
 
 
 export default router;
