@@ -270,5 +270,33 @@ router.put("/users/:id/bank-transaction", async (req, res) => {
   }
 });
 
+// CHECK TRANSACTION BY ID
+router.get("/transaction/:transactionId", async (req, res) => {
+  try {
+    const { transactionId } = req.params;
+
+    if (!transactionId) {
+      return res.status(400).json({
+        message: "Transaction ID is required",
+      });
+    }
+
+    const user = await User.findOne({ bankTransaction: transactionId }).select("-password");
+
+    if (!user) {
+      return res.status(404).json({
+        message: "Invalid or No matching Transaction ID found",
+      });
+    }
+
+    res.status(200).json({
+      message: "Transaction Found",
+      user,
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+});
 
 export default router;
