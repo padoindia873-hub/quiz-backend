@@ -299,4 +299,41 @@ router.get("/transaction/:transactionId", async (req, res) => {
   }
 });
 
+// UPDATE BUY ROLL (No Auth)
+router.put("/users/:id/buy-roll", async (req, res) => {
+  try {
+    const { buyRoll } = req.body;
+
+    if (!buyRoll) {
+      return res.status(400).json({
+        message: "buyRoll value is required",
+      });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.params.id,
+      { buyRoll },
+      { new: true }
+    ).select("-password");
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    res.status(200).json({
+      message: "buyRoll updated successfully",
+      user: updatedUser,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Server error",
+      error: error.message,
+    });
+  }
+});
+
+
 export default router;
