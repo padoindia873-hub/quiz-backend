@@ -302,7 +302,7 @@ router.get("/transaction/:transactionId", async (req, res) => {
 // UPDATE BUY ROLL (No Auth)
 // UPDATE buyRoll USING transactionId
 // UPDATE BUYROLL BY TRANSACTION ID
-router.put("/update-buyroll-by-transaction/:transactionId", async (req, res) => {
+router.put("/update-buyRoll-by-transaction/:transactionId", async (req, res) => {
   try {
     const { transactionId } = req.params;
     const { buyRoll } = req.body;
