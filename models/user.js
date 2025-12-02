@@ -27,7 +27,10 @@ const userSchema = new mongoose.Schema({
   studentClass: String,
   schoolAddress: String,
   aadharCardNumber: String,
-  bankTransaction: String
+  bankTransaction: String,
+  section:String,
+  schoolRoll: String,
+  buyRoll: String
 });
 
 export default mongoose.model("User", userSchema);
