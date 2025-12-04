@@ -331,6 +331,50 @@ router.put("/update-buyRoll-by-transaction/:transactionId", async (req, res) => 
   }
 });
 
+// VERIFY PIN + DISTRICT + STATE API
+router.post("/verify-pin-details", async (req, res) => {
+  try {
+    const { pin, district, state } = req.body;
+
+    // Validate inputs
+    if (!pin || !district || !state) {
+      return res.status(400).json({
+        message: "PIN, district, and state are required",
+      });
+    }
+
+    if (pin.length !== 6) {
+      return res.status(400).json({
+        message: "PIN must be 6 digits",
+      });
+    }
+
+    // Find user with all three fields matching
+    const user = await User.findOne({
+      pin,
+      district: { $regex: new RegExp("^" + district + "$", "i") },
+      state: { $regex: new RegExp("^" + state + "$", "i") },
+    }).select("-password");
+
+    if (!user) {
+      return res.status(404).json({
+        message: "Invalid details. No matching record found",
+      });
+    }
+
+    res.status(200).json({
+      message: "Verification Successful",
+      user,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Server Error",
+      error: error.message,
+    });
+  }
+});
+
 
 
 export default router;
