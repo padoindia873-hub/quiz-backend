@@ -416,6 +416,33 @@ router.post("/save-details", async (req, res) => {
   }
 });
 
+// CHECK NAME + BUYROLL (NO UPDATE)
+router.post("/check-details", async (req, res) => {
+  try {
+    const { name, buyRoll } = req.body;
 
+    // Validate fields
+    if (!name || buyRoll === undefined) {
+      return res.status(400).json({
+        message: "name and buyRoll are required",
+      });
+    }
+
+    // Just checking, not updating anything
+    return res.status(200).json({
+      message: "Details received successfully",
+      data: {
+        name,
+        buyRoll
+      }
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      message: "Server Error",
+      error: error.message,
+    });
+  }
+});
 
 export default router;
