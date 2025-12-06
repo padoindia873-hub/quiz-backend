@@ -133,6 +133,50 @@ router.post("/register1", async (req, res) => {
 
 
 
+// router.post("/register", upload.single("profileImage"), async (req, res) => {
+//   try {
+//     const { email, password, userType, adminSecretCode } = req.body;
+
+//     // Check existing user
+//     const existingUser = await User.findOne({ email });
+//     if (existingUser) {
+//       return res.status(400).json({ message: "Email already registered" });
+//     }
+
+//     /* Admin validation */
+//     if (userType === "ADMIN" && adminSecretCode !== "PADHO_INDIA_ADMIN_2025") {
+//       return res.status(403).json({ message: "Invalid Admin Secret Code" });
+//     }
+
+//     /* Super Admin Validation */
+//     if (
+//       userType === "SUPER_ADMIN" &&
+//       adminSecretCode !== "PADHO_INDIA_SUPER_ADMIN_2025"
+//     ) {
+//       return res.status(403).json({ message: "Invalid Super Admin Code" });
+//     }
+
+//     // Hash password
+//     const hashedPassword = await bcrypt.hash(password, 10);
+
+//     const newUser = new User({
+//       ...req.body,
+//       password: hashedPassword,
+//       profileImage: req.file ? req.file.filename : null,
+//     });
+
+//     await newUser.save();
+
+//     return res.status(201).json({
+//       message: "Registration successful",
+//       user: newUser,
+//     });
+
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ message: "Internal Server Error", error: err.message });
+//   }
+// });
 router.post("/register", upload.single("profileImage"), async (req, res) => {
   try {
     const { email, password, userType, adminSecretCode } = req.body;
@@ -143,38 +187,44 @@ router.post("/register", upload.single("profileImage"), async (req, res) => {
       return res.status(400).json({ message: "Email already registered" });
     }
 
-    /* Admin validation */
-    if (userType === "ADMIN" && adminSecretCode !== "PADHO_INDIA_ADMIN_2025") {
+    /* USER TYPE VALIDATION */
+    let finalUserType = userType || "STUDENT";  // Default Student
+
+    // Admin Validation
+    if (finalUserType === "ADMIN" && adminSecretCode !== "PADHO_INDIA_ADMIN_2025") {
       return res.status(403).json({ message: "Invalid Admin Secret Code" });
     }
 
-    /* Super Admin Validation */
-    if (
-      userType === "SUPER_ADMIN" &&
-      adminSecretCode !== "PADHO_INDIA_SUPER_ADMIN_2025"
-    ) {
-      return res.status(403).json({ message: "Invalid Super Admin Code" });
+    // Super Admin Validation
+    if (finalUserType === "SUPER_ADMIN" && adminSecretCode !== "PADHO_INDIA_SUPER_ADMIN_2025") {
+      return res.status(403).json({ message: "Invalid Super Admin Secret Code" });
     }
 
-    // Hash password
+    // Hash Password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Create User Object
     const newUser = new User({
-      ...req.body,
+      ...req.body, // store all fields
       password: hashedPassword,
-      profileImage: req.file ? req.file.filename : null,
+      userType: finalUserType,
+      profileImage: req.file 
+        ? `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}` 
+        : null,
     });
 
+    // Save user
     await newUser.save();
 
-    return res.status(201).json({
+    res.status(201).json({
+      success: true,
       message: "Registration successful",
       user: newUser,
     });
 
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Internal Server Error", error: err.message });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal Server Error", error: error.message });
   }
 });
 
