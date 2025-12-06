@@ -71,78 +71,44 @@ const SUPER_ADMIN_SECRET_CODE = "PADHO_INDIA_SUPER_ADMIN_2025";
 /* -------------------------------------
    REGISTER USER (Student/Admin/SuperAdmin)
 -------------------------------------- */
-// router.post("/register", async (req, res) => {
-//   try {
-//     const { email, password, userType, adminSecretCode } = req.body;
+router.post("/register1", async (req, res) => {
+  try {
+    const { email, password, userType, adminSecretCode } = req.body;
 
-//     // Check existing user
-//     const existingUser = await User.findOne({ email });
-//     if (existingUser) {
-//       return res.status(400).json({ message: "Email already registered" });
-//     }
+    // Check existing user
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: "Email already registered" });
+    }
 
-//     /* ---------------------------------------------------
-//          STUDENT → Always allowed
-//     --------------------------------------------------- */
-//     if (userType === "STUDENT") {
-//       // allowed without secret code
-//     }
+    /* ---------------------------------------------------
+         STUDENT → Always allowed
+    --------------------------------------------------- */
+    if (userType === "STUDENT") {
+      // allowed without secret code
+    }
 
-//     /* ---------------------------------------------------
-//          ADMIN → requires ADMIN SECRET CODE
-//     --------------------------------------------------- */
-//     if (userType === "ADMIN") {
-//       if (adminSecretCode !== ADMIN_SECRET_CODE) {
-//         return res.status(401).json({
-//           message: "Invalid ADMIN Secret Code",
-//         });
-//       }
-//     }
-
-//     /* ---------------------------------------------------
-//          SUPER ADMIN → requires SUPER ADMIN SECRET CODE
-//     --------------------------------------------------- */
-//     if (userType === "SUPER_ADMIN") {
-//       if (adminSecretCode !== SUPER_ADMIN_SECRET_CODE) {
-//         return res.status(401).json({
-//           message: "Invalid SUPER ADMIN Secret Code",
-//         });
-//       }
-//     }
-
-    router.post(
-      "/register",
-      upload.single("profileImage"),
-      async (req, res) => {
-        try {
-          if (req.file) {
-            req.body.profileImage = "/uploads/" + req.file.filename;
-          }
-
-          const { email, password, userType, adminSecretCode } = req.body;
-
-          // keep your validation + secret code logic
-
-          const hashedPassword = await bcrypt.hash(password, 10);
-
-          const newUser = new User({
-            ...req.body,
-            password: hashedPassword,
-          });
-
-          await newUser.save();
-
-          res.status(201).json({
-            message: `${userType} Registration Successful`,
-            userType: newUser.userType,
-          });
-        } catch (error) {
-          res
-            .status(500)
-            .json({ message: "Server error", error: error.message });
-        }
+    /* ---------------------------------------------------
+         ADMIN → requires ADMIN SECRET CODE
+    --------------------------------------------------- */
+    if (userType === "ADMIN") {
+      if (adminSecretCode !== ADMIN_SECRET_CODE) {
+        return res.status(401).json({
+          message: "Invalid ADMIN Secret Code",
+        });
       }
-    );
+    }
+
+    /* ---------------------------------------------------
+         SUPER ADMIN → requires SUPER ADMIN SECRET CODE
+    --------------------------------------------------- */
+    if (userType === "SUPER_ADMIN") {
+      if (adminSecretCode !== SUPER_ADMIN_SECRET_CODE) {
+        return res.status(401).json({
+          message: "Invalid SUPER ADMIN Secret Code",
+        });
+      }
+    }
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -159,6 +125,38 @@ const SUPER_ADMIN_SECRET_CODE = "PADHO_INDIA_SUPER_ADMIN_2025";
       message: `${userType} Registration Successful`,
       userType: newUser.userType,
     });
+
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
+
+
+router.post("/register", upload.single("profileImage"), async (req, res) => {
+  try {
+    if (req.file) {
+      req.body.profileImage = "/uploads/" + req.file.filename;
+    }
+
+    const { email, password, userType, adminSecretCode } = req.body;
+
+    // keep your validation + secret code logic
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = new User({
+      ...req.body,
+      password: hashedPassword,
+    });
+
+    await newUser.save();
+
+    res.status(201).json({
+      message: `${userType} Registration Successful`,
+      userType: newUser.userType,
+    });
+
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
   }
@@ -252,21 +250,21 @@ router.post("/find-user", async (req, res) => {
       message: "User Found",
       user,
     });
+
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 });
 router.get("/users", async (req, res) => {
   try {
-    const students = await User.find({ userType: "STUDENT" }).select(
-      "-password"
-    );
+    const students = await User.find({ userType: "STUDENT" }).select("-password");
 
     res.status(200).json({
       message: "Student Users Fetched Successfully",
       count: students.length,
       users: students,
     });
+
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
   }
@@ -297,6 +295,7 @@ router.put("/users/:id/bank-transaction", async (req, res) => {
       message: "Bank Transaction Updated Successfully",
       user: updatedUser,
     });
+
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
   }
@@ -313,9 +312,7 @@ router.get("/transaction/:transactionId", async (req, res) => {
       });
     }
 
-    const user = await User.findOne({ bankTransaction: transactionId }).select(
-      "-password"
-    );
+    const user = await User.findOne({ bankTransaction: transactionId }).select("-password");
 
     if (!user) {
       return res.status(404).json({
@@ -327,46 +324,43 @@ router.get("/transaction/:transactionId", async (req, res) => {
       message: "Transaction Found",
       user,
     });
+
   } catch (error) {
     res.status(500).json({ message: "Server Error", error: error.message });
   }
 });
 
+
 // UPDATE BUYROLL BY TRANSACTION ID
-router.put(
-  "/update-buyRoll-by-transaction/:transactionId",
-  async (req, res) => {
-    try {
-      let { transactionId } = req.params;
-      const { buyRoll } = req.body;
+router.put("/update-buyRoll-by-transaction/:transactionId", async (req, res) => {
+  try {
+    let { transactionId } = req.params;
+    const { buyRoll } = req.body;
 
-      if (!transactionId)
-        return res.status(400).json({ message: "Transaction ID is required" });
-      if (buyRoll === undefined || buyRoll === null)
-        return res.status(400).json({ message: "buyRoll value is required" });
+    if (!transactionId) return res.status(400).json({ message: "Transaction ID is required" });
+    if (buyRoll === undefined || buyRoll === null)
+      return res.status(400).json({ message: "buyRoll value is required" });
 
-      transactionId = transactionId.trim().toLowerCase();
+    transactionId = transactionId.trim().toLowerCase();
 
-      const updatedUser = await User.findOneAndUpdate(
-        { bankTransaction: { $regex: new RegExp(`^${transactionId}$`, "i") } },
-        { buyRoll: String(buyRoll) }, // convert to string so schema matches
-        { new: true }
-      ).select("-password");
+    const updatedUser = await User.findOneAndUpdate(
+      { bankTransaction: { $regex: new RegExp(`^${transactionId}$`, "i") } },
+      { buyRoll: String(buyRoll) }, // convert to string so schema matches
+      { new: true }
+    ).select("-password");
 
-      if (!updatedUser)
-        return res
-          .status(404)
-          .json({ message: "No user found with this transaction ID" });
+    if (!updatedUser)
+      return res.status(404).json({ message: "No user found with this transaction ID" });
 
-      res.status(200).json({
-        message: "buyRoll updated successfully",
-        user: updatedUser,
-      });
-    } catch (error) {
-      res.status(500).json({ message: "Server error", error: error.message });
-    }
+    res.status(200).json({
+      message: "buyRoll updated successfully",
+      user: updatedUser,
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
   }
-);
+});
 
 // VERIFY PIN + DISTRICT + STATE API
 router.post("/verify-pin-details", async (req, res) => {
@@ -403,6 +397,7 @@ router.post("/verify-pin-details", async (req, res) => {
       message: "Verification Successful",
       user,
     });
+
   } catch (error) {
     res.status(500).json({
       message: "Server Error",
@@ -410,6 +405,7 @@ router.post("/verify-pin-details", async (req, res) => {
     });
   }
 });
+
 
 // UPDATE NAME + BUYROLL API
 router.post("/save-details", async (req, res) => {
@@ -427,7 +423,7 @@ router.post("/save-details", async (req, res) => {
       userId,
       {
         firstName: name,
-        buyRoll: buyRoll,
+        buyRoll: buyRoll
       },
       { new: true }
     ).select("-password");
@@ -442,6 +438,7 @@ router.post("/save-details", async (req, res) => {
       message: "Details saved successfully",
       user: updatedUser,
     });
+
   } catch (error) {
     res.status(500).json({
       message: "Server Error",
@@ -467,9 +464,10 @@ router.post("/check-details", async (req, res) => {
       message: "Details received successfully",
       data: {
         name,
-        buyRoll,
-      },
+        buyRoll
+      }
     });
+
   } catch (error) {
     return res.status(500).json({
       message: "Server Error",
