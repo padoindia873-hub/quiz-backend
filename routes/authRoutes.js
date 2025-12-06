@@ -493,4 +493,18 @@ router.post("/check-details", async (req, res) => {
   }
 });
 
+router.get("/students", async (req, res) => {
+  try {
+    const students = await User.find(); // assuming your model name is Student
+
+    return res.status(200).json({
+      total: students.length,
+      students,
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching students", error: err.message });
+  }
+});
+
+
 export default router;
