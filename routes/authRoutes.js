@@ -134,6 +134,7 @@ router.post("/register1", async (req, res) => {
 
 
 router.post("/register", upload.single("profileImage"), async (req, res) => {
+  
   try {
     if (req.file) {
       req.body.profileImage = "/uploads/" + req.file.filename;
