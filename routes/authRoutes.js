@@ -134,34 +134,50 @@ router.post("/register1", async (req, res) => {
 
 
 router.post("/register", upload.single("profileImage"), async (req, res) => {
-  
   try {
-    if (req.file) {
-      req.body.profileImage = "/uploads/" + req.file.filename;
-    }
-
     const { email, password, userType, adminSecretCode } = req.body;
 
-    // keep your validation + secret code logic
+    // Check existing user
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: "Email already registered" });
+    }
 
+    /* Admin validation */
+    if (userType === "ADMIN" && adminSecretCode !== "PADHO_INDIA_ADMIN_2025") {
+      return res.status(403).json({ message: "Invalid Admin Secret Code" });
+    }
+
+    /* Super Admin Validation */
+    if (
+      userType === "SUPER_ADMIN" &&
+      adminSecretCode !== "PADHO_INDIA_SUPER_ADMIN_2025"
+    ) {
+      return res.status(403).json({ message: "Invalid Super Admin Code" });
+    }
+
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = new User({
       ...req.body,
       password: hashedPassword,
+      profileImage: req.file ? req.file.filename : null,
     });
 
     await newUser.save();
 
-    res.status(201).json({
-      message: `${userType} Registration Successful`,
-      userType: newUser.userType,
+    return res.status(201).json({
+      message: "Registration successful",
+      user: newUser,
     });
 
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Internal Server Error", error: err.message });
   }
 });
+
 
 /* ----------------------------
    USER LOGIN
