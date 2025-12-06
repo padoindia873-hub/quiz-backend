@@ -30,7 +30,19 @@ const userSchema = new mongoose.Schema({
   bankTransaction: String,
   section:String,
   schoolRoll: String,
-  buyRoll: String
+  buyRoll: String,
+  profileImage: String,
+  startTime:String,
+  endTime:String,
+  rollActive:String,
+  rollInactive:String,
+  rank:String,
+  academyMarks: String,
+  gkMarks: String,
+  fistLevel:String,
+  secLevel:String,
+  thirdLevel:String,
+  winnerDetails: String
 });
 
 export default mongoose.model("User", userSchema);
