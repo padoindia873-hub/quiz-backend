@@ -399,35 +399,52 @@ router.get("/transaction/:transactionId", async (req, res) => {
 
 
 // UPDATE BUYROLL BY TRANSACTION ID
-router.put("/update-buyRoll-by-transaction/:transactionId", async (req, res) => {
+router.put("/update-start-buyroll/:transactionId", async (req, res) => {
   try {
     let { transactionId } = req.params;
-    const { buyRoll } = req.body;
+    const { startTime, buyRoll } = req.body;
 
-    if (!transactionId) return res.status(400).json({ message: "Transaction ID is required" });
-    if (buyRoll === undefined || buyRoll === null)
-      return res.status(400).json({ message: "buyRoll value is required" });
+    if (!transactionId)
+      return res.status(400).json({ message: "Transaction ID is required" });
 
     transactionId = transactionId.trim().toLowerCase();
 
-    const updatedUser = await User.findOneAndUpdate(
-      { bankTransaction: { $regex: new RegExp(`^${transactionId}$`, "i") } },
-      { buyRoll: String(buyRoll) }, // convert to string so schema matches
-      { new: true }
-    ).select("-password");
+    // Find user by Transaction ID
+    const user = await User.findOne({
+      bankTransaction: { $regex: new RegExp(`^${transactionId}$`, "i") }
+    });
 
-    if (!updatedUser)
-      return res.status(404).json({ message: "No user found with this transaction ID" });
+    if (!user) {
+      return res.status(404).json({
+        message: "No user found with this transaction ID",
+      });
+    }
+
+    // ---- Only update if fields are EMPTY ----
+    if (!user.startTime || user.startTime.trim() === "") {
+      if (startTime) user.startTime = startTime;
+    }
+
+    if (!user.buyRoll || user.buyRoll.trim() === "") {
+      if (buyRoll) user.buyRoll = buyRoll.toString();
+    }
+
+    // Save updated user
+    await user.save();
 
     res.status(200).json({
-      message: "buyRoll updated successfully",
-      user: updatedUser,
+      message: "Fields updated successfully (only empty fields updated)",
+      user: user,
     });
 
   } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
+    res.status(500).json({
+      message: "Server error",
+      error: error.message,
+    });
   }
 });
+
 
 // VERIFY PIN + DISTRICT + STATE API
 router.post("/verify-pin-details", async (req, res) => {
