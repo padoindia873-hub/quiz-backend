@@ -399,6 +399,36 @@ router.get("/transaction/:transactionId", async (req, res) => {
 
 
 // UPDATE BUYROLL BY TRANSACTION ID
+router.put("/update-buyRoll-by-transaction/:transactionId", async (req, res) => {
+  try {
+    let { transactionId } = req.params;
+    const { buyRoll } = req.body;
+
+    if (!transactionId) return res.status(400).json({ message: "Transaction ID is required" });
+    if (buyRoll === undefined || buyRoll === null)
+      return res.status(400).json({ message: "buyRoll value is required" });
+
+    transactionId = transactionId.trim().toLowerCase();
+
+    const updatedUser = await User.findOneAndUpdate(
+      { bankTransaction: { $regex: new RegExp(`^${transactionId}$`, "i") } },
+      { buyRoll: String(buyRoll) }, // convert to string so schema matches
+      { new: true }
+    ).select("-password");
+
+    if (!updatedUser)
+      return res.status(404).json({ message: "No user found with this transaction ID" });
+
+    res.status(200).json({
+      message: "buyRoll updated successfully",
+      user: updatedUser,
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
 router.put("/update-start-buyroll/:transactionId", async (req, res) => {
   try {
     let { transactionId } = req.params;
@@ -444,8 +474,6 @@ router.put("/update-start-buyroll/:transactionId", async (req, res) => {
     });
   }
 });
-
-
 // VERIFY PIN + DISTRICT + STATE API
 router.post("/verify-pin-details", async (req, res) => {
   try {
