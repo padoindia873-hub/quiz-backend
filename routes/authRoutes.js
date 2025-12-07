@@ -630,7 +630,7 @@ router.post("/check-details", async (req, res) => {
   try {
     const { name, buyRoll } = req.body;
 
-    // Validate incoming data
+    // Validate fields
     if (!name || buyRoll === undefined || buyRoll === null) {
       return res.status(400).json({
         status: false,
@@ -638,19 +638,28 @@ router.post("/check-details", async (req, res) => {
       });
     }
 
-    // Check only STUDENTS from database
-    const students = await User.find({ userType: "STUDENT" });
+    // FIND USER IN DATABASE (STUDENT)
+    const student = await User.findOne({
+      userType: "STUDENT",
+      firstName: name,        // or fullName depending on your DB
+      buyRoll: buyRoll
+    });
 
+    // If not found in database
+    if (!student) {
+      return res.status(404).json({
+        status: false,
+        message: "Name or Roll Number does not match any student.",
+      });
+    }
+
+    // If found → success
     return res.status(200).json({
       status: true,
-      message: "Details received successfully",
-      data: {
-        name,
-        buyRoll,
-        totalStudents: students.length,  // <-- User Table Student Count
-        students,                         // <-- Send list if needed
-      },
+      message: "Student found.",
+      data: student
     });
+
   } catch (error) {
     return res.status(500).json({
       status: false,
@@ -659,6 +668,7 @@ router.post("/check-details", async (req, res) => {
     });
   }
 });
+
 
 
 
