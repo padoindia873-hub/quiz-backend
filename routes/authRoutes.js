@@ -630,7 +630,7 @@ router.post("/check-details", async (req, res) => {
   try {
     const { name, buyRoll } = req.body;
 
-    // Validate fields
+    // Validate incoming data
     if (!name || buyRoll === undefined || buyRoll === null) {
       return res.status(400).json({
         status: false,
@@ -638,11 +638,18 @@ router.post("/check-details", async (req, res) => {
       });
     }
 
-    // No database update — Only checking the values
+    // Check only STUDENTS from database
+    const students = await User.find({ userType: "STUDENT" });
+
     return res.status(200).json({
       status: true,
       message: "Details received successfully",
-      data: { name, buyRoll },
+      data: {
+        name,
+        buyRoll,
+        totalStudents: students.length,  // <-- User Table Student Count
+        students,                         // <-- Send list if needed
+      },
     });
   } catch (error) {
     return res.status(500).json({
@@ -652,6 +659,7 @@ router.post("/check-details", async (req, res) => {
     });
   }
 });
+
 
 
 router.get("/students", async (req, res) => {
