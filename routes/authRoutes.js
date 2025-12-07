@@ -631,27 +631,28 @@ router.post("/check-details", async (req, res) => {
     const { name, buyRoll } = req.body;
 
     // Validate fields
-    if (!name || buyRoll === undefined) {
+    if (!name || buyRoll === undefined || buyRoll === null) {
       return res.status(400).json({
+        status: false,
         message: "name and buyRoll are required",
       });
     }
 
-    // Just checking, not updating anything
+    // No database update — Only checking the values
     return res.status(200).json({
+      status: true,
       message: "Details received successfully",
-      data: {
-        name,
-        buyRoll,
-      },
+      data: { name, buyRoll },
     });
   } catch (error) {
     return res.status(500).json({
+      status: false,
       message: "Server Error",
       error: error.message,
     });
   }
 });
+
 
 router.get("/students", async (req, res) => {
   try {
