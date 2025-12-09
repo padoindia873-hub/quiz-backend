@@ -42,7 +42,10 @@ const userSchema = new mongoose.Schema({
   fistLevel:String,
   secLevel:String,
   thirdLevel:String,
-  winnerDetails: String
+  winnerDetails: String,
+  oneUserBuyRoll: String,
+  oneUserWinner:String,
+  bankTransactionStudent: String,
 });
 
 export default mongoose.model("User", userSchema);
