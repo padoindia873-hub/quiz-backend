@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import User from "../models/user.js";
 import authMiddleware from "../middleware/authMiddleware.js";
 import upload from "../middleware/upload.js";
+import bcrypt from "bcryptjs";
 
 const router = express.Router();
 const ADMIN_SECRET_CODE = "PADHO_INDIA_ADMIN_2025";
@@ -273,6 +274,46 @@ router.post("/login", async (req, res) => {
   } catch (error) {
     console.error("Login Error:", error);
     res.status(500).json({ message: "Server Error", error: error.message });
+  }
+});
+
+// GET STUDENT DETAILS BY EMAIL
+router.get("/student-by-email/:email", async (req, res) => {
+  try {
+    const { email } = req.params;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Email is required",
+      });
+    }
+
+    // Find only STUDENT by email
+    const student = await User.findOne({
+      email: email.toLowerCase(),
+      userType: "STUDENT",
+    }).select("-password");
+
+    if (!student) {
+      return res.status(404).json({
+        success: false,
+        message: "Student not found with this email",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Student data fetched successfully",
+      data: student,
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Server Error",
+      error: error.message,
+    });
   }
 });
 
