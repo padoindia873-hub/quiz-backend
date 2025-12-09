@@ -4,7 +4,6 @@ import jwt from "jsonwebtoken";
 import User from "../models/user.js";
 import authMiddleware from "../middleware/authMiddleware.js";
 import upload from "../middleware/upload.js";
-import bcrypt from "bcryptjs";
 
 const router = express.Router();
 const ADMIN_SECRET_CODE = "PADHO_INDIA_ADMIN_2025";
