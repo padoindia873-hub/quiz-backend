@@ -543,6 +543,65 @@ router.put("/update-start-time-end-time/:transactionId", async (req, res) => {
   }
 });
 
+router.put("/update-user-after-exam/:transactionId", async (req, res) => {
+  try {
+    const { transactionId } = req.params;
+
+    const {
+      endTime,
+      rollActive,
+      academyMarks,
+      gkMarks,
+      fistLevel,
+      secLevel,
+      thirdLevel,
+      rank,
+      rollInactive,
+      winnerDetails,
+    } = req.body;
+
+    //  Find user by bankTransaction
+    const updatedUser = await User.findOneAndUpdate(
+      { bankTransaction: transactionId },
+      {
+        $set: {
+          endTime,
+          rollActive,
+          rollInactive,
+          academyMarks,
+          gkMarks,
+          fistLevel,
+          secLevel,
+          thirdLevel,
+          rank,
+          winnerDetails,
+        },
+      },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found with this transaction ID",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "User updated successfully after exam",
+      data: updatedUser,
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+});
+
 // VERIFY PIN + DISTRICT + STATE API
 router.post("/verify-pin-details", async (req, res) => {
   try {
