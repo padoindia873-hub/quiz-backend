@@ -601,6 +601,39 @@ router.put("/update-user-after-exam/:transactionId", async (req, res) => {
     });
   }
 });
+router.post("/delete-transaction", async (req, res) => {
+  try {
+    const { transactionId } = req.body;
+
+    if (!transactionId)
+      return res.status(400).json({ message: "Transaction ID is required" });
+
+    const updatedUser = await User.findOneAndUpdate(
+      { bankTransaction: transactionId },
+      {
+        $unset: {
+          bankTransaction: "",
+          buyRoll: "",
+          rollActive: "",
+          rollInactive: ""
+        }
+      },
+      { new: true }
+    );
+
+    if (!updatedUser)
+      return res.status(404).json({ message: "No user found with this transaction ID" });
+
+    return res.status(200).json({
+      message: "Transaction removed successfully",
+      user: updatedUser
+    });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server error", error });
+  }
+});
 
 // VERIFY PIN + DISTRICT + STATE API
 router.post("/verify-pin-details", async (req, res) => {
