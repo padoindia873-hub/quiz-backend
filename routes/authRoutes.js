@@ -821,5 +821,48 @@ router.get("/students", async (req, res) => {
     });
   }
 });
+router.put("/update-by-transaction/:transactionId", async (req, res) => {
+  try {
+    let { transactionId } = req.params;
+
+    if (!transactionId) {
+      return res.status(400).json({
+        message: "Transaction ID is required",
+      });
+    }
+
+    transactionId = transactionId.trim().toLowerCase();
+
+    // Find student by bankTransaction
+    const user = await User.findOne({
+      bankTransaction: { $regex: new RegExp(`^${transactionId}$`, "i") },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "No user found with this transaction ID",
+      });
+    }
+
+    // Update fields dynamically
+    Object.keys(req.body).forEach((field) => {
+      user[field] = req.body[field];
+    });
+
+    await user.save();
+
+    res.status(200).json({
+      message: "User updated successfully using bankTransaction ID",
+      user,
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Server error",
+      error: error.message,
+    });
+  }
+});
 
 export default router;
