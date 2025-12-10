@@ -821,30 +821,30 @@ router.get("/students", async (req, res) => {
     });
   }
 });
-router.put("/update-by-transaction/:transactionId", async (req, res) => {
+router.put("/update-by-email/:email", async (req, res) => {
   try {
-    let { transactionId } = req.params;
+    let { email } = req.params;
 
-    if (!transactionId) {
+    if (!email) {
       return res.status(400).json({
-        message: "Transaction ID is required",
+        message: "Email is required",
       });
     }
 
-    transactionId = transactionId.trim().toLowerCase();
+    email = email.trim().toLowerCase();
 
-    // Find student by bankTransaction
+    // Find student by email
     const user = await User.findOne({
-      bankTransaction: { $regex: new RegExp(`^${transactionId}$`, "i") },
+      email: { $regex: new RegExp(`^${email}$`, "i") },
     });
 
     if (!user) {
       return res.status(404).json({
-        message: "No user found with this transaction ID",
+        message: "No user found with this email",
       });
     }
 
-    // Update fields dynamically
+    // Update fields dynamically (bankTransaction, buyRoll, etc.)
     Object.keys(req.body).forEach((field) => {
       user[field] = req.body[field];
     });
@@ -852,7 +852,7 @@ router.put("/update-by-transaction/:transactionId", async (req, res) => {
     await user.save();
 
     res.status(200).json({
-      message: "User updated successfully using bankTransaction ID",
+      message: "User updated successfully using Email",
       user,
     });
 
@@ -864,5 +864,6 @@ router.put("/update-by-transaction/:transactionId", async (req, res) => {
     });
   }
 });
+
 
 export default router;
