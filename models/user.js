@@ -27,7 +27,13 @@ const userSchema = new mongoose.Schema({
   studentClass: String,
   schoolAddress: String,
   aadharCardNumber: String,
+  bankName:String,
+  accountNumber: String,
   bankTransaction: String,
+  ifSeCode:String,
+  miCrCode:String,
+  cifId:String,
+  amount:String,
   section:String,
   schoolRoll: String,
   buyRoll: String,
@@ -46,6 +52,7 @@ const userSchema = new mongoose.Schema({
   oneUserBuyRoll: String,
   oneUserWinner:String,
   bankTransactionStudent: String,
+ 
 });
 
 export default mongoose.model("User", userSchema);
