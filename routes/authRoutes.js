@@ -865,5 +865,65 @@ router.put("/update-by-email/:email", async (req, res) => {
   }
 });
 
+// ------------------------------
+// BANK PAYMENT ENTRY API
+// ------------------------------
+router.post("/bank-payment", async (req, res) => {
+  try {
+    const {
+      email,
+      password,
+      bankName,
+      accountNumber,
+      transactionId,
+      IfScCode,
+      MiCrCode,
+      CifId,
+      amount
+    } = req.body;
+
+    // 1. Validate
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email & Password are required" });
+    }
+
+    // 2. Find user by email
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "Invalid email or password" });
+    }
+
+    // 3. Verify password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid email or password" });
+    }
+
+    // 4. Save Bank Payment details in DB
+    user.bankName = bankName;
+    user.accountNumber = accountNumber;
+    user.bankTransaction = transactionId;
+    user.ifSeCode = IfScCode;
+    user.miCrCode = MiCrCode;
+    user.cifId = CifId;
+    user.amount = amount;
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Bank payment details saved successfully",
+      user
+    });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message
+    });
+  }
+});
 
 export default router;
