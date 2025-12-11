@@ -1,5 +1,5 @@
 import express from "express";
-import { saveResult, getResultByRoll } from "../controllers/resultController.js";
+import { saveResult, getResultByRoll ,getRankings} from "../controllers/resultController.js";
 
 const router = express.Router();
 
