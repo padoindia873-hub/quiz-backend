@@ -30,25 +30,50 @@ export const getResultByRoll = async (req, res) => {
 
 
 // Get results with ranking (1st, 2nd, 3rd...)
+// export const getRankings = async (req, res) => {
+//   try {
+//     // Sort by highest score → lowest
+//     const results = await Result.find().sort({ score: -1 });
+
+//     if (!results.length) {
+//       return res.status(404).json({ message: "No results found" });
+//     }
+
+//     // Add rank number
+//     const rankedResults = results.map((item, index) => ({
+//       ...item._doc,
+//       rank: index + 1   // 1st → 2nd → 3rd → ...
+//     }));
+
+//     res.json({ success: true, rankedResults });
+
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// };
+
 export const getRankings = async (req, res) => {
   try {
-    // Sort by highest score → lowest
     const results = await Result.find().sort({ score: -1 });
 
     if (!results.length) {
       return res.status(404).json({ message: "No results found" });
     }
 
-    // Add rank number
     const rankedResults = results.map((item, index) => ({
       ...item._doc,
-      rank: index + 1   // 1st → 2nd → 3rd → ...
+      rank: index + 1
     }));
 
-    res.json({ success: true, rankedResults });
+    res.json({ 
+      success: true,
+      totalStudents: results.length,   // 👈 total students count
+      rankedResults 
+    });
 
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+
 
